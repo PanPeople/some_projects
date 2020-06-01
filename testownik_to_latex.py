@@ -1,3 +1,5 @@
+#testownik_to_latex.py skrypt przeszukuje pytania w swoim katalogu (numerowane od 1 do -> <edytowalna wartoścć>)
+#i generuje plik odpowiedzi_all, który można skompilować przy pomocy np. overleaf
 file = open("odpowiedzi_all.txt", "a")#nazwa pliku docelowego
 
 
@@ -88,16 +90,6 @@ for i in range(1,28+1):#przeszukuj pytania od 1 do 28, tak 28, nie 29
 	print("")
 	print("")
 
-	
-	
-	
-
-
-	
-
-	
-	
-	
 	questions_file.close()
 
 	
@@ -109,8 +101,3 @@ file.write("\n")
 file.write("\end{document}\n")
 
 file.close()
-	
-
-	
-
-	
