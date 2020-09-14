@@ -1,3 +1,21 @@
+/* USER CODE BEGIN Header */
+/**
+  ******************************************************************************
+  * @file           : main.c
+  * @brief          : Main program body
+  ******************************************************************************
+  * @attention
+  *
+  * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+  * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by ST under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
+  *
+  ******************************************************************************
+  */
 /*
  ******************************************************************************
  * @file    main.c
@@ -18,537 +36,813 @@
  * for uC so please be kind in reporting all bugs.
  *
  */
+/* USER CODE END Header */
+/* Includes ------------------------------------------------------------------*/
+#include "main.h"
+
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+
+/* USER CODE END Includes */
+
+/* Private typedef -----------------------------------------------------------*/
+/* USER CODE BEGIN PTD */
+
+/* USER CODE END PTD */
+
+/* Private define ------------------------------------------------------------*/
+/* USER CODE BEGIN PD */
+//GCC standard commands
+#define SI_CMD_ID       0x00
+#define SI_CMD_POLL     0x40
+#define SI_CMD_ORIGINS  0x41
+#define SI_CMD_CALIB    0x42
+#define SI_CMD_RESET    0xFF
+/* USER CODE END PD */
+
+/* Private macro -------------------------------------------------------------*/
+/* USER CODE BEGIN PM */
+
+/* USER CODE END PM */
+
+/* Private variables ---------------------------------------------------------*/
+ADC_HandleTypeDef hadc1;
+DMA_HandleTypeDef hdma_adc1;
+
+TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim3;
+
+UART_HandleTypeDef huart2;
+
+/* USER CODE BEGIN PV */
+uint16_t adc_value[4];//table for ADC values used with DMA
+uint16_t receivedMessage[8];
+uint16_t receivedMessageLength = 0;
+uint16_t bite_counter = 0;
+uint16_t byte_counter = 0;
+
+uint16_t buttons[14];//gamecube use 12 buttons + "analog" R and L:
+uint8_t GC_data[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};//buttons state request
+uint8_t GC_data_message[10] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};//messages request
+uint8_t DMA_data[82]= { 0, 0, 0, 0, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 0, 0, 0,
+						0, 0};
+
+uint8_t justZero =0;
+
+uint16_t IC_Val1 = 0;
+uint16_t IC_Val2 = 0;
+uint16_t received_value = 0;
+uint16_t bit_value = 0 ;
 
 
-#include "stm32f1xx.h"//requied library
-#include "stm32f1xx_nucleo.h"//requied library
-			
-#define ADC_CHANNELS 4 //numbers of ADC channels, 2x2 for joysticks
+uint8_t RxData[3];
 
-#define LL_ADC_RESOLUTION_8B (ADC_CR1_RES_1)//setting an 8 bit resolution of ADC
+uint8_t counter = 0;
 
-//handlers
-DMA_HandleTypeDef dma;
-ADC_HandleTypeDef adc;
-TIM_HandleTypeDef tim;
-GPIO_InitTypeDef gpio;
+/* USER CODE END PV */
 
-#ifdef DEBUG
-UART_HandleTypeDef uart;//UART for debuging
-
-#endif
-
-//function declaration
-long map(long x, long in_min, long in_max, long out_min, long out_max);//map function declaration -> i used function for clearance in code
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
-void TIM2_IRQHandler(void);
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
-
-//global variables
-uint16_t adc_value[ADC_CHANNELS];//table for ADC values used with DMA
-int counter = 0;//counter used in TIMER_3 interrupt
-int joystick_counter = 64-1;//counter used to switch beetween buttons and joystcks
-uint16_t buttons[12];//gamecube use 12 buttons:
-/*
- * A B X Y
- * UP DOWN LEFT RIGHT
- * R L R_analog L_analog Z
- * START
- */
+/* Private function prototypes -----------------------------------------------*/
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+static void MX_TIM3_Init(void);
+static void MX_USART2_UART_Init(void);
+static void MX_DMA_Init(void);
+static void MX_ADC1_Init(void);
+static void MX_TIM2_Init(void);
+/* USER CODE BEGIN PFP */
 
 
-/*	additional info:
-*
-*	I used ADC_CHANNEL_0,ADC_CHANNEL_1,ADC_CHANNEL_4,ADC_CHANNEL_8
-*	Because i wanted to use UART
-*
-*/
-int main(void)
+uint8_t map(uint16_t x, uint16_t in_min, uint16_t in_max, uint8_t out_min, uint8_t out_max);//map function declaration -> i used function for clearance in code
+void adcConversion();
+void buttonsCheck();
+void bitsArray();
+
+void sendData(uint8_t lenght, uint8_t* msg);//conversion of bytes array into
+
+void buttonMessageChange(); //depending on 2 byte from RxData, it is RxData[1], we have to make conversion of last 4 bytes
+
+/* USER CODE END PFP */
+
+/* Private user code ---------------------------------------------------------*/
+/* USER CODE BEGIN 0 */
+
+
+// write the input capture callback
+
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
-    SystemCoreClock = 8000000; //frequency -> 8MHz
-    HAL_Init();
+	if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3)  // falling edge interrupt
+	{
+		// read captured value
+		IC_Val1 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_3);  // first value
 
-    __HAL_RCC_GPIOA_CLK_ENABLE();//macro for enabling A port
-    __HAL_RCC_GPIOB_CLK_ENABLE();//macro for enabling B port
-    __HAL_RCC_GPIOC_CLK_ENABLE();//macro for enabling C port
+		if (IC_Val1 != 0)  // if the value is not 0
+		{
+			// read second value
+			IC_Val2 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_4); // rising edge value
 
-	__HAL_RCC_TIM3_CLK_ENABLE();//macro for enabling TIMER_3
+			// calculate what kind of bit was received
 
-#ifdef DEBUG
-    __HAL_RCC_USART2_CLK_ENABLE();//macro for enabling UART port
-#endif
+			received_value = (IC_Val2*100/IC_Val1);
 
-    __HAL_RCC_DMA1_CLK_ENABLE();//macro for enabling DMA channel
-    __HAL_RCC_ADC1_CLK_ENABLE();//macro for enabling ADC feature
+			if (received_value == 75  ){
+				bit_value = 0;
+			}
 
+			else{ // received_value < 75
+				bit_value = 1;
+			}
 
+			bite_counter ++;
+			if (bite_counter == 8){
+				byte_counter++;
+			}
 
-#ifdef DEBUG
-    //all configuration stuff for UART
-
-    //UART -> A2 (TX) A3 (RX)
-    GPIO_InitTypeDef gpio;
-    gpio.Mode = GPIO_MODE_AF_PP;//alternative mode push-pull mode for TX / output line pin
-    gpio.Pin = GPIO_PIN_2;
-    gpio.Pull = GPIO_NOPULL;
-    gpio.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init(GPIOA, &gpio);
-
-    gpio.Mode = GPIO_MODE_AF_INPUT;//alternative mode input mode for RX / input line pin
-    gpio.Pin = GPIO_PIN_3;
-    HAL_GPIO_Init(GPIOA, &gpio);
-
-
-    // UART conviguration
-    uart.Instance = USART2;
-    uart.Init.BaudRate = 115200;// baudrate/speed -> 115200 (standard speed)
-    uart.Init.WordLength = UART_WORDLENGTH_8B;
-    uart.Init.Parity = UART_PARITY_NONE;
-    uart.Init.StopBits = UART_STOPBITS_1;
-    uart.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-    uart.Init.OverSampling = UART_OVERSAMPLING_16;
-    uart.Init.Mode = UART_MODE_TX_RX;// receive (RX) and send/transmit (TX) mode
-    HAL_UART_Init(&uart);
-
-
-    // A5 as output (built in LED)
-    gpio.Mode = GPIO_MODE_OUTPUT_PP;
-    gpio.Pin = GPIO_PIN_5;
-    HAL_GPIO_Init(GPIOA, &gpio);
-
-#endif
-
-    // A0 , A1, A4 and B0 as "analog" pins -> two per stick
-    gpio.Mode = GPIO_MODE_ANALOG;
-    gpio.Pin = GPIO_PIN_0 | GPIO_PIN_1| GPIO_PIN_4;
-    HAL_GPIO_Init(GPIOA, &gpio);//A0, A1, A4
-
-    gpio.Mode = GPIO_MODE_ANALOG;
-    gpio.Pin = GPIO_PIN_0;
-    HAL_GPIO_Init(GPIOB, &gpio);//B0
-
-    // ADC clock configuration
-    RCC_PeriphCLKInitTypeDef adc_clk;
-    adc_clk.PeriphClockSelection = RCC_PERIPHCLK_ADC;
-    adc_clk.AdcClockSelection = RCC_ADCPCLK2_DIV2;
-    HAL_RCCEx_PeriphCLKConfig(&adc_clk);
-
-    // ADC configuration
-    //LL_ADC_RESOLUTION_12B
-    adc.Instance = ADC1;
-    adc.Init.ContinuousConvMode = ENABLE;//continous mode of mesaurement
-    adc.Init.ExternalTrigConv = ADC_SOFTWARE_START;
-    adc.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-    adc.Init.ScanConvMode = ADC_SCAN_ENABLE;
-    adc.Init.NbrOfConversion = ADC_CHANNELS;//in this case the amount is equal 4
-    adc.Init.DiscontinuousConvMode = DISABLE;
-    adc.Init.NbrOfDiscConversion = 1;
-    HAL_ADC_Init(&adc);
-
-    // ADC channels configurations
-    ADC_ChannelConfTypeDef adc_ch;
-    adc_ch.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
-    // channel 0 -> A0 <- (ADC12_IN0)
-    adc_ch.Channel = ADC_CHANNEL_0;
-    adc_ch.Rank = ADC_REGULAR_RANK_1;
-    HAL_ADC_ConfigChannel(&adc, &adc_ch);
-    // channel 1 -> A1 <- (ADC12_IN1)
-    adc_ch.Channel = ADC_CHANNEL_1;
-    adc_ch.Rank = ADC_REGULAR_RANK_2;
-    HAL_ADC_ConfigChannel(&adc, &adc_ch);
-    // channel 4 -> A4 <- (ADC12_IN4)
-    adc_ch.Channel = ADC_CHANNEL_4;
-    adc_ch.Rank = ADC_REGULAR_RANK_3;
-    HAL_ADC_ConfigChannel(&adc, &adc_ch);
-    // channel 8 -> B0 <- (ADC12_IN8)
-    adc_ch.Channel = ADC_CHANNEL_8;
-    adc_ch.Rank = ADC_REGULAR_RANK_4;
-    HAL_ADC_ConfigChannel(&adc, &adc_ch);
-
-    HAL_ADCEx_Calibration_Start(&adc);//like the name of fuction says, we calibrate the ADC
-
-    //DMA configuration staff
-    dma.Instance = DMA1_Channel1;
-    dma.Init.Direction = DMA_PERIPH_TO_MEMORY;//peripheries to memory mode
-    dma.Init.PeriphInc = DMA_PINC_DISABLE;//we don't increment the adress of peripheries
-    dma.Init.MemInc = DMA_MINC_ENABLE;//we increment adress od DMA memory because we have multiple variables to read
-    dma.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
-    dma.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
-    dma.Init.Mode = DMA_CIRCULAR;//CIRCULAR mode which allow us to read the data all the time, default: DMA_NORMAL
-    dma.Init.Priority = DMA_PRIORITY_HIGH;
-    HAL_DMA_Init(&dma);//like the name aplies we initialize our DMA
-
-
-    __HAL_LINKDMA(&adc, DMA_Handle, dma);//macro which "connect" DMA and ADC
-
-    HAL_ADC_Start_DMA(&adc, (uint32_t*)adc_value, ADC_CHANNELS);//just starting DMA
-
-
-    //TIMER_3 configuration staff -> now it is set for debug purpose for 1 second loop (target 1 us)
-	tim.Instance = TIM3;
-	tim.Init.Period = 1000 - 1;
-	tim.Init.Prescaler = 8000 - 1;//now our TIMER_3 count to 1000
-	tim.Init.ClockDivision = 0;
-	tim.Init.CounterMode = TIM_COUNTERMODE_UP;
-	tim.Init.RepetitionCounter = 0;
-	tim.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-	HAL_TIM_Base_Init(&tim);
-	HAL_TIM_Base_Start_IT(&tim);
-
-	HAL_NVIC_EnableIRQ(TIM3_IRQn);//enabling TIMER interumpt called NVIC (software interupt)
-
-
-	//configuration of input interrupts
-	gpio.Mode = GPIO_MODE_IT_RISING_FALLING;
-	gpio.Pull = GPIO_PULLUP;
-
-	//B1 -> interrupt 1
-	gpio.Pin = GPIO_PIN_1;
-	HAL_GPIO_Init(GPIOB, &gpio);
-	//B2 -> interrupt 2
-	gpio.Pin = GPIO_PIN_2;
-	HAL_GPIO_Init(GPIOB, &gpio);
-	//C3 -> interrupt 3
-	gpio.Pin = GPIO_PIN_3;
-	HAL_GPIO_Init(GPIOC, &gpio);
-	//C4 -> interrupt 4
-	gpio.Pin = GPIO_PIN_4;
-	HAL_GPIO_Init(GPIOC, &gpio);
-	//C5 -> interrupt 5
-	gpio.Pin = GPIO_PIN_5;
-	HAL_GPIO_Init(GPIOC, &gpio);
-	//C6 -> interrupt 6
-	gpio.Pin = GPIO_PIN_6;
-	HAL_GPIO_Init(GPIOC, &gpio);
-	//B7 -> interrupt 7
-	gpio.Pin = GPIO_PIN_7;
-	HAL_GPIO_Init(GPIOB, &gpio);
-	//C8 -> interrupt 8
-	gpio.Pin = GPIO_PIN_1;
-	HAL_GPIO_Init(GPIOC, &gpio);
-	//C9 -> interrupt 9
-	gpio.Pin = GPIO_PIN_1;
-	HAL_GPIO_Init(GPIOC, &gpio);
-	//C10 -> interrupt 10
-	gpio.Pin = GPIO_PIN_10;
-	HAL_GPIO_Init(GPIOC, &gpio);
-	//B11 -> interrupt 11
-	gpio.Pin = GPIO_PIN_11;
-	HAL_GPIO_Init(GPIOB, &gpio);
-	//B12 -> interrupt 12
-	gpio.Pin = GPIO_PIN_12;
-	HAL_GPIO_Init(GPIOB, &gpio);
-	//B13 -> interrupt 13
-	gpio.Pin = GPIO_PIN_13;
-	HAL_GPIO_Init(GPIOB, &gpio);
-	//B14 -> interrupt 14
-	gpio.Pin = GPIO_PIN_14;
-	HAL_GPIO_Init(GPIOB, &gpio);
-	//B15 -> interrupt 15
-	gpio.Pin = GPIO_PIN_15;
-	HAL_GPIO_Init(GPIOB, &gpio);
-
-
-	//enabling all pin interupts
-	HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
-	HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
-	HAL_NVIC_EnableIRQ(EXTI4_IRQn);
-	HAL_NVIC_EnableIRQ(EXTI3_IRQn);
-	HAL_NVIC_EnableIRQ(EXTI2_IRQn);
-	HAL_NVIC_EnableIRQ(EXTI1_IRQn);
-	HAL_NVIC_EnableIRQ(EXTI0_IRQn);
-
-	//our output/sifnal pin configuraiton
-	//note transalte polish coments
-	gpio.Pin = GPIO_PIN_3; // konfigurujemy pin 5
-	gpio.Mode = GPIO_MODE_OUTPUT_PP; // jako wyjście
-	gpio.Pull = GPIO_NOPULL; // rezystory podciągające są wyłączone
-	gpio.Speed = GPIO_SPEED_FREQ_HIGH; // wystarczą nieskie częstotliwości przełączania
-	HAL_GPIO_Init(GPIOB, &gpio); // inicjalizacja modułu GPIOA
+			//putting bit_value into bytes array
+			receivedMessage[byte_counter] += bit_value;
+			receivedMessage[byte_counter] <<= 1;
+			receivedMessageLength = byte_counter + 1;
 
 
 
-    while (1) {
+		}
 
-#ifdef DEBUG
-
-    	for (int i = 0; i < ADC_CHANNELS; i++)
-    		printf("ADC%d = %d\n", i, adc_value[i]);//in debug mode we can see what the values are
-
-#endif
-    }
-
+		else
+		{
+			bit_value = 0;
+		}
+	}
+}
 
 
+void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	 switch (htim->Channel) {
+
+		 case HAL_TIM_ACTIVE_CHANNEL_1:{
+			 // tu nadamy sygnał
+			 HAL_TIM_Base_Stop_IT(&htim3);//stop timer interupts to not reading data from MOSI
+
+			 switch(receivedMessage[0]){
+			 	 case SI_CMD_ID :
+			 	 case SI_CMD_RESET :
+			 		 GC_data_message[0] = 0x09;
+			 		 GC_data_message[1] = 0x00;
+			 		 GC_data_message[2] = 0x03;
+
+			 		 sendData(3, GC_data_message);
+			 		 //send_data
 
 
+			 	break;
+
+			 	 case SI_CMD_POLL :{
+			 		buttonMessageChange();
+			 		sendData(8, GC_data);
+
+			 		 break;
+			 	 }
+			 	 case SI_CMD_ORIGINS :{
+
+			 		 break;
+			 	 }
+			 	 case SI_CMD_CALIB :{
+			 		 GC_data_message[0] = 0x00;
+			 		 GC_data_message[1] = 0x80;
+			 		 GC_data_message[2] = 0x80;
+			 		 GC_data_message[3] = 0x80;
+			 		 GC_data_message[4] = 0x80;
+			 		 GC_data_message[5] = 0x80;
+			 		 GC_data_message[6] = 0x00;
+			 		 GC_data_message[7] = 0x00;
+			 		 GC_data_message[8] = 0x00;
+			 		 GC_data_message[9] = 0x00;
+			 		 sendData(10, GC_data_message)
+			 		 //send_data
+			 		 break;
+			 	 }
+
+			 	 default:{
+
+			 		 break;
+			 	 }
 
 
+			 }
+
+			 break;
+		 }
+
+		 default:{
+			 break;
+		 }
+
+	 }
 }
 
 
 
+/* USER CODE END 0 */
 
-long map(long x, long in_min, long in_max, long out_min, long out_max)
+/**
+  * @brief  The application entry point.
+  * @retval int
+  */
+int main(void)
+{
+  /* USER CODE BEGIN 1 */
+
+  /* USER CODE END 1 */
+
+  /* MCU Configuration--------------------------------------------------------*/
+
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
+
+  /* USER CODE BEGIN Init */
+
+  /* USER CODE END Init */
+
+  /* Configure the system clock */
+  SystemClock_Config();
+
+  /* USER CODE BEGIN SysInit */
+
+  /* USER CODE END SysInit */
+
+  /* Initialize all configured peripherals */
+  MX_GPIO_Init();
+  MX_TIM3_Init();
+  MX_USART2_UART_Init();
+  MX_DMA_Init();
+  MX_ADC1_Init();
+  MX_TIM2_Init();
+  /* USER CODE BEGIN 2 */
+  HAL_TIM_Base_Start_IT(&htim3); //do wylacanie: HAL_TIM_Base_Stop_IT
+  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, 6);//if nothing happened after 6us it means there is no received data and start sending data
+  HAL_TIM_PWM_Start_DMA(&htim2, TIM_CHANNEL_1, justZero, 1);//sending only 0
+  /* USER CODE END 2 */
+
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+	adcConversion();
+	buttonsCheck();
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
+  }
+  /* USER CODE END 3 */
+}
+
+/**
+  * @brief System Clock Configuration
+  * @retval None
+  */
+void SystemClock_Config(void)
+{
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
+
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI_DIV2;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL16;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
+  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV6;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+  {
+    Error_Handler();
+  }
+}
+
+/**
+  * @brief ADC1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_ADC1_Init(void)
+{
+
+  /* USER CODE BEGIN ADC1_Init 0 */
+
+  /* USER CODE END ADC1_Init 0 */
+
+  ADC_ChannelConfTypeDef sConfig = {0};
+
+  /* USER CODE BEGIN ADC1_Init 1 */
+
+  /* USER CODE END ADC1_Init 1 */
+  /** Common config
+  */
+  hadc1.Instance = ADC1;
+  hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
+  hadc1.Init.ContinuousConvMode = ENABLE;
+  hadc1.Init.DiscontinuousConvMode = DISABLE;
+  hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc1.Init.NbrOfConversion = 2;
+  if (HAL_ADC_Init(&hadc1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Regular Channel
+  */
+  sConfig.Channel = ADC_CHANNEL_10;
+  sConfig.Rank = ADC_REGULAR_RANK_1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Regular Channel
+  */
+  sConfig.Rank = ADC_REGULAR_RANK_2;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN ADC1_Init 2 */
+
+  /* USER CODE END ADC1_Init 2 */
+
+}
+
+/**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 64-1;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 4-3;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_LOW;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+  HAL_TIM_MspPostInit(&htim2);
+
+}
+
+/**
+  * @brief TIM3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM3_Init(void)
+{
+
+  /* USER CODE BEGIN TIM3_Init 0 */
+
+  /* USER CODE END TIM3_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_IC_InitTypeDef sConfigIC = {0};
+
+  /* USER CODE BEGIN TIM3_Init 1 */
+
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 64-1;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 0xffff;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_IC_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
+  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
+  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
+  sConfigIC.ICFilter = 0;
+  if (HAL_TIM_IC_ConfigChannel(&htim3, &sConfigIC, TIM_CHANNEL_3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;
+  sConfigIC.ICSelection = TIM_ICSELECTION_INDIRECTTI;
+  if (HAL_TIM_IC_ConfigChannel(&htim3, &sConfigIC, TIM_CHANNEL_4) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM3_Init 2 */
+
+  /* USER CODE END TIM3_Init 2 */
+
+}
+
+/**
+  * @brief USART2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART2_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART2_Init 0 */
+
+  /* USER CODE END USART2_Init 0 */
+
+  /* USER CODE BEGIN USART2_Init 1 */
+
+  /* USER CODE END USART2_Init 1 */
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 115200;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART2_Init 2 */
+
+  /* USER CODE END USART2_Init 2 */
+
+}
+
+/**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Channel1_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+
+}
+
+/**
+  * @brief GPIO Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_GPIO_Init(void)
+{
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+  /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin : B1_Pin */
+  GPIO_InitStruct.Pin = B1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PC4 PC5 PC6 PC8
+                           PC9 PC10 PC11 PC12 */
+  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_8
+                          |GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PB2 PB13 PB14 PB15
+                           PB7 */
+  GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15
+                          |GPIO_PIN_7;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PD2 */
+  GPIO_InitStruct.Pin = GPIO_PIN_2;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
+}
+
+/* USER CODE BEGIN 4 */
+void adcConversion(){
+	// conversion for Joystick X  Joystick Y  C-Stick X  C-Stick Y
+
+	GC_data[2] = map(adc_value[0],0,4095,0,255);
+	GC_data[3] = map(adc_value[1],0,4095,0,255);
+	GC_data[4] = map(adc_value[2],0,4095,0,255);
+	GC_data[5] = map(adc_value[3],0,4095,0,255);
+
+}
+
+uint8_t map(uint16_t x, uint16_t in_min, uint16_t in_max, uint8_t out_min, uint8_t out_max)
 {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)//TIMER_3 interrupt
-{
-	counter++;//has to be at the begining
+//please check
+void buttonsCheck(){//ta funkcja ma mi wypełnić 2 bajty stanami przycisków oraz bajt "7 i 8" wypełniony 1 (no zapełniony bajt) dla wciśniętego
 
-	 //HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
-	 //HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
+	GC_data[0] = 0x00;
+	GC_data[1] = 0b10000000;
+	GC_data[6] = 0x00;
+	GC_data[7] = 0x00;
 
-	//sending 0 0 0 0
-	if ((joystick_counter == 0) || (joystick_counter == 1) || (joystick_counter == 2) || (joystick_counter == 3)) {
-		if (counter <= 3){
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
-		}
-		else if (counter == 4){//can be change to "else"
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
-		}
+	uint8_t mask = 0b00100000;
 
-	}
-	//for START Y X B A
-	else if(joystick_counter>=4 && joystick_counter<=8){
-		//button checking might be done using iterator from "joystick_counter"
-		if (buttons[joystick_counter - 4]){
-			if (counter == 1){
-				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
-			}
-			else if (counter > 1){//can be change to "else"
-				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
-			}
+	if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_2) == GPIO_PIN_RESET){
+		 GC_data[0] += (mask >>= 1) ;
+	 }
+	 else{
 
-		}
-		else{
-			if (counter <= 3){
-				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
-			}
-			else if (counter == 4){//can be change to "else"
-				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
-			}
-		}
-	}
-	//sending 1 1
-	else if (joystick_counter == 9 || joystick_counter== 10 ){
-		if (counter ==1){
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
-		}
-		else if (counter > 1){//can be change to "else"
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
-		}
-	}
-	//for L R Z D-Up D-Down D-Right D-Left
-	else if(joystick_counter>= 11 && joystick_counter<= 17){
-		//button checking might be done using iterator from "joystick_counter"
-		if (buttons[joystick_counter - 6]){
-			if (counter == 1){
-				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
-			}
-			else if (counter > 1){//can be change to "else"
-				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
-			}
-		}
-		else{
-			if (counter <= 3){
-				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
-			}
-			else if (counter == 4){//can be change to "else"
-				HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
-			}
-		}
-	}
+	 }
 
+	 if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_7) == GPIO_PIN_RESET){
+		 GC_data[0] += (mask >>= 1) ;
+	 }
+	 else{
 
+	 }
 
+	 if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_13) == GPIO_PIN_RESET){
+		 GC_data[0] += (mask >>= 1) ;
+	 }
+	 else{
 
-	//has to be at the end
-	if (counter == 4){
-		counter = 0;
-		joystick_counter++;
-	}
+	 }
+
+	 if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_14) == GPIO_PIN_RESET){
+		 GC_data[0] += (mask >>= 1) ;
+	 }
+	 else{
+
+	 }
+
+	 if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_15) == GPIO_PIN_RESET){
+		 GC_data[0] += (mask >>= 1) ;
+	 }
+	 else{
+
+	 }
+	 mask = 0b10000000;
+
+	 if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_4) == GPIO_PIN_RESET){
+		 GC_data[1] += (mask >>= 1) ;
+	 }
+	 else{
+
+	 }
+
+	 if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_5) == GPIO_PIN_RESET){
+		 GC_data[1] += (mask >>= 1) ;
+	 }
+	 else{
+
+	 }
+
+	 if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_6) == GPIO_PIN_RESET){
+		 GC_data[1] += (mask >>= 1) ;
+	 }
+	 else{
+
+	 }
+
+	 if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_8) == GPIO_PIN_RESET){
+		 GC_data[1] += (mask >>= 1) ;
+	 }
+	 else{
+
+	 }
+
+	 if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_9) == GPIO_PIN_RESET){
+		 GC_data[1] += (mask >>= 1) ;
+	 }
+	 else{
+
+	 }
+
+	 if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_10) == GPIO_PIN_RESET){
+		 GC_data[1] += (mask >>= 1) ;
+	 }
+	 else{
+
+	 }
+
+	 if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_11) == GPIO_PIN_RESET){
+		 GC_data[1] += (mask >>= 1) ;
+	 }
+	 else{
+
+	 }
+
+	 if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_12) == GPIO_PIN_RESET){
+		 GC_data[6] = 0xff ;
+	 }
+	 else{
+
+	 }
+
+	 if (HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_2) == GPIO_PIN_RESET){
+		 GC_data[7] = 0xff ;
+	 }
+	 else{
+
+	 }
+
 
 }
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)//buttons interrupt
-{
-	//switch for handling all buttons
-	switch (GPIO_Pin){
+void buttonMessageChange(){
 
-	case GPIO_PIN_0 :{
-		if (buttons[0]==0){
-			buttons[0]=1;
-		}
-		else if (buttons[0]==1){
-			buttons[0]=0;
-		}
-	}
-	break;
+	uint8_t ra = GC_data[6];
+	uint8_t la = GC_data[7];
 
-	case GPIO_PIN_1 :{
-		if (buttons[1]==0){
-			buttons[1]=1;
-		}
-		else if (buttons[1]==1){
-			buttons[1]=0;
-		}
-	}
-	break;
+	 switch (RxData[1]) {
+	        case 0:
+	        case 5:
+	        case 6:
+	        case 7:
+	            //I swear Microchip, I hate you -> Aurelio words
+	            GC_data[6] = (uint8_t)((uint8_t)(la & 0xF0U) | (uint8_t)(ra >> 4U));
+	            GC_data[7] = 0x00; //Analog A/B
+	        break;
 
-	case GPIO_PIN_2 :{
-		if (buttons[2]==0){
-			buttons[2]=1;
-		}
-		else if (buttons[2]==1){
-			buttons[2]=0;
-		}
-	}
-	break;
+	        case 1:
+	        	GC_data[4] = (uint8_t)((uint8_t)(GC_data[4] & 0xF0U) | (uint8_t)(GC_data[5] >> 4U));
+	        	GC_data[5] = la;
+	        	GC_data[6] = ra;
+	            GC_data[7] = 0x00; //Analog A/B
+	        break;
 
-	case GPIO_PIN_3 :{
-		if (buttons[3]==0){
-			buttons[3]=1;
-		}
-		else if (buttons[3]==1){
-			buttons[3]=0;
-		}
-	}
-	break;
+	        case 2:
+	        	GC_data[4] = (uint8_t)((uint8_t)(GC_data[4] & 0xF0U) | (uint8_t)(GC_data[5] >> 4U));
+	        	GC_data[5] = (uint8_t)((uint8_t)(la & 0xF0U) | (uint8_t)(ra >> 4U));
+	        	GC_data[6] = 0x00; //Analog A
+	        	GC_data[7] = 0x00; //Analog B
+	        break;
 
-	case GPIO_PIN_4 :{
-		if (buttons[4]==0){
-			buttons[4]=1;
-		}
-		else if (buttons[4]==1){
-			buttons[4]=0;
-		}
-	}
-	break;
+	        case 3:
 
-	case GPIO_PIN_5 :{
-		if (buttons[5]==0){
-			buttons[5]=1;
-		}
-		else if (buttons[5]==1){
-			buttons[5]=0;
-		}
-	}
-	break;
+	        	GC_data[6] = la;
+	            GC_data[7] = ra;
+	        break;
 
-	case GPIO_PIN_6 :{
-		if (buttons[6]==0){
-			buttons[6]=1;
-		}
-		else if (buttons[6]==1){
-			buttons[6]=0;
-		}
-	}
-	break;
-
-	case GPIO_PIN_7 :{
-		if (buttons[7]==0){
-			buttons[7]=1;
-		}
-		else if (buttons[7]==1){
-			buttons[7]=0;
-		}
-	}
-	break;
-
-	case GPIO_PIN_8 :{
-		if (buttons[8]==0){
-			buttons[8]=1;
-		}
-		else if (buttons[8]==1){
-			buttons[8]=0;
-		}
-	}
-	break;
-
-	case GPIO_PIN_9 :{
-		if (buttons[9]==0){
-			buttons[9]=1;
-		}
-		else if (buttons[9]==1){
-			buttons[9]=0;
-		}
-	}
-	break;
-
-	case GPIO_PIN_10 :{
-		if (buttons[10]==0){
-			buttons[10]=1;
-		}
-		else if (buttons[10]==1){
-			buttons[10]=0;
-		}
-	}
-	break;
-
-	case GPIO_PIN_11 :{
-		if (buttons[11]==0){
-			buttons[11]=1;
-		}
-		else if (buttons[11]==1){
-			buttons[11]=0;
-		}
-	}
-	break;
-
-	case GPIO_PIN_12 :{
-		if (buttons[12]==0){
-			buttons[12]=1;
-		}
-		else if (buttons[12]==1){
-			buttons[12]=0;
-		}
-	}
-	break;
-
-	case GPIO_PIN_13 :{
-		if (buttons[13]==0){
-			buttons[13]=1;
-		}
-		else if (buttons[13]==1){
-			buttons[13]=0;
-		}
-	}
-	break;
-
-	case GPIO_PIN_14 :{
-		if (buttons[14]==0){
-			buttons[14]=1;
-		}
-		else if (buttons[14]==1){
-			buttons[14]=0;
-		}
-	}
-	break;
-
-	case GPIO_PIN_15 :{
-		if (buttons[15]==0){
-			buttons[15]=1;
-		}
-		else if (buttons[15]==1){
-			buttons[15]=0;
-		}
-	}
-	break;
-
-	default :{
-
-
-	}
-	break;
-
-
-	}
+	        case 4:
+	        	GC_data[4] = GC_data[4];
+	        	GC_data[5] = GC_data[5];
+	        	GC_data[6] = 0x00; //Analog A
+	        	GC_data[7] = 0x00; //Analog B
+	        break;
+	    }
 }
 
-void TIM2_IRQHandler(void)
-{
- HAL_TIM_IRQHandler(&tim);
+//please check
+void sendData(uint8_t lenght, uint8_t* msg){//dostaje tablice jedno bajtowe i trzeba je pociąć na pojedyńcze bity jedne po drugim
+	for (int i = 0 ; i< 66; i++){
+		DMA_data[i] = 0;
+	}
+	uint8_t j =0;
+	for (uint8_t i =0 ; i< lenght; i++){
+
+
+		//j = 0;
+		for(uint8_t bit_mask = 1 << (8-1); bit_mask > 0; bit_mask >>= 1){
+
+			if (bit_mask & msg[i]){
+				DMA_data[j] = 1;
+			}
+			else{
+				DMA_data[j] = 3;
+			}
+
+			j++;
+		}
+	}
+
+	DMA_data[j] = 1; //stop bit "1 " at the end
+	DMA_data[j+1] = 0;//stan wysoki po skończonym wysyle
+	//trza je wysłać
+	HAL_TIM_PWM_Start_DMA(&htim2, TIM_CHANNEL_1, DMA_data, j+2);//j+2 or (length*2 +2)
+
 }
+
+/* USER CODE END 4 */
+
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
+void Error_Handler(void)
+{
+  /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
+
+  /* USER CODE END Error_Handler_Debug */
+}
+
+#ifdef  USE_FULL_ASSERT
+/**
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
+void assert_failed(uint8_t *file, uint32_t line)
+{
+  /* USER CODE BEGIN 6 */
+  /* User can add his own implementation to report the file name and line number,
+     tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* USER CODE END 6 */
+}
+#endif /* USE_FULL_ASSERT */
+
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
