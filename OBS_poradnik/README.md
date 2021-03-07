@@ -59,9 +59,11 @@ Cały bajer/funkcja polega na ustawieniu Zooma i Teamsa na jakieś inne urządze
 > (Tak wiem, że w Zoom można kliknąć pod awatarem zębatkę xD)
 >
 > <img src="./pictures/OBS_4.png" style="zoom: 50%;" />
+> 
 > **Zoom** 
 >
-> <img src="./pictures/OBS_5.PNG" style="zoom: 50%;" />
+> <img src="./pictures/OBS_5.png" style="zoom: 50%;" />
+> 
 > **MS Teams**
 >
 > Jak widać ja mam ustawione wyjście na kartę dźwiękową na USB, dlaczego? Bo mam i przynajmniej do czegoś się przyda, a nie mam już laptopa gdzie liczyłem każdy port USB jak drobne przed końcem miesiąca, ale wirtualne urządzenie audio też działa normalnie)
@@ -76,10 +78,13 @@ Cały bajer/funkcja polega na ustawieniu Zooma i Teamsa na jakieś inne urządze
 > Potem wybieramy drobne pierdoły:
 >
 > (pole z nazwą tam zostawiamy co tam jest domyślne, jak nazwa nie pasuje można zmienić)
+> 
 > <img src="./pictures/OBS_7.png" style="zoom: 50%;" />
 >
 > Potem ustawiamy:
+> 
 > <img src="./pictures/OBS_8.png" style="zoom: 50%;" />
+> 
 > * Okno - chyba wiadomo (można przeklikać i w podglądzie będzie widoczne)
 > * Metoda przechwytywania - u mnie działa ta co zaznaczona
 > * Priorytet..... - to chyba nawet jest domyślnie
@@ -96,6 +101,7 @@ Cały bajer/funkcja polega na ustawieniu Zooma i Teamsa na jakieś inne urządze
 > #### Witam tych co pomineli xD
 >
 > teraz ustawimy urządzenie audio, czyli ostatnia rzecz i można się rozejść
+> 
 > <img src="./pictures/OBS_10.png" style="zoom: 50%;" />
 >
 > * Teraz w zakładce **Źródła obrazu** dodajemy **Przechwytywanie źródła dźwięku**.
@@ -103,9 +109,12 @@ Cały bajer/funkcja polega na ustawieniu Zooma i Teamsa na jakieś inne urządze
 > * <img src="./pictures/OBS_11.png" style="zoom: 50%;" />
 > Tutaj zaznaczamy to co zaznaczyliśmy w Teams i w Zoom w sensie to samo urządzenie audio
 > * Ostatnia rzecz to nasłuchiwanie
+> 
 >   <img src="./pictures/OBS_12.png" style="zoom: 50%;" />
+>   
 >   Prawym w sekcji mikser dźwięku i **Zaawansowane ustawienia dźwięku**
 >   <img src="./pictures/OBS_13.png" style="zoom: 50%;" />
+>   
 >   Tutaj **Audio_out** to moja nazwa na **Przechwytywanie źródła dźwięku**, które dodawaliśmy wcześniej
 >
 ### 4. Podsumowanie
