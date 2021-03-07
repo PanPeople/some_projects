@@ -7,6 +7,7 @@ Cały bajer/funkcja polega na ustawieniu Zooma i Teamsa na jakieś inne urządze
 1. Po zainstalowaniu OBS przechodzimy do ustawień (ja mam po polsku i nie marudzić):
 
 > <img src="./pictures/OBS_1.png" style="zoom:50%;" />
+> 
 > Plik $\rightarrow$ Ustawienia
 
 ## Zakładki/sekcje:
