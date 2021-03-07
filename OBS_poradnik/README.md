@@ -6,14 +6,14 @@ Cały bajer/funkcja polega na ustawieniu Zooma i Teamsa na jakieś inne urządze
 
 1. Po zainstalowaniu OBS przechodzimy do ustawień (ja mam po polsku i nie marudzić):
 
-> <img src="./OBS_1.png" style="zoom:50%;" />
+> <img src="./pictures/OBS_1.png" style="zoom:50%;" />
 > Plik $\rightarrow$ Ustawienia
 
 ## Zakładki/sekcje:
 
 ### 1. Wyjście
 
-> <img src="./OBS_2.png" style="zoom: 50%;" />
+> <img src="./pictures/OBS_2.png" style="zoom: 50%;" />
 > Ustawienia $\rightarrow$ Wyjście
 >
 > Jesteśmy po multimediach więc czym jest **Bitrate obrazu** i **Bitrate dźwięku** tłumaczyć nie trzeba.
@@ -24,11 +24,11 @@ Cały bajer/funkcja polega na ustawieniu Zooma i Teamsa na jakieś inne urządze
 > 
 
 ### 2. Obraz
-><img src="./OBS_9.png" style="zoom: 50%;" />
+><img src="./pictures/OBS_9.png" style="zoom: 50%;" />
 >Ustaw co tam chcesz tak naprawdę.
 
 ### 3. Dźwięk
-> <img src="./OBS_3.png" style="zoom: 50%;" />
+> <img src="./pictures/OBS_3.png" style="zoom: 50%;" />
 > Ustawienia $\rightarrow$ Dźwięk
 >
 > Urządzenia audio 1 i audio 2- myślę, że intuicyjne, możecie nic nie zaznaczać
@@ -57,10 +57,10 @@ Cały bajer/funkcja polega na ustawieniu Zooma i Teamsa na jakieś inne urządze
 > Do ustawień wchodzimy Nasz awatar $\rightarrow$ Ustawienia
 > (Tak wiem, że w Zoom można kliknąć pod awatarem zębatkę xD)
 >
-> <img src="./OBS_4.png" style="zoom: 50%;" />
+> <img src="./pictures/OBS_4.png" style="zoom: 50%;" />
 > **Zoom** 
 >
-> <img src="./OBS_5.PNG" style="zoom: 50%;" />
+> <img src="./pictures/OBS_5.PNG" style="zoom: 50%;" />
 > **MS Teams**
 >
 > Jak widać ja mam ustawione wyjście na kartę dźwiękową na USB, dlaczego? Bo mam i przynajmniej do czegoś się przyda, a nie mam już laptopa gdzie liczyłem każdy port USB jak drobne przed końcem miesiąca, ale wirtualne urządzenie audio też działa normalnie)
@@ -69,16 +69,16 @@ Cały bajer/funkcja polega na ustawieniu Zooma i Teamsa na jakieś inne urządze
 ### 3. Panel główny OBS
 > #### Jak umiesz okno nagrać to pomiajasz
 > Może nie każdy wie jak mieć ustawione okno w OBS do nagrywania, więc:
-> <img src="./OBS_6.png" style="zoom: 50%;" />
+> <img src="./pictures/OBS_6.png" style="zoom: 50%;" />
 > Okno, a nie ekran, bo inaczej nie bedzie sobie można wrzucić przeglądarki na ekran, a wiadomo, że są często ważniejsze rzeczy niż wykład.
 >
 > Potem wybieramy drobne pierdoły:
 >
 > (pole z nazwą tam zostawiamy co tam jest domyślne, jak nazwa nie pasuje można zmienić)
-> <img src="./OBS_7.png" style="zoom: 50%;" />
+> <img src="./pictures/OBS_7.png" style="zoom: 50%;" />
 >
 > Potem ustawiamy:
-> <img src="./OBS_8.png" style="zoom: 50%;" />
+> <img src="./pictures/OBS_8.png" style="zoom: 50%;" />
 > * Okno - chyba wiadomo (można przeklikać i w podglądzie będzie widoczne)
 > * Metoda przechwytywania - u mnie działa ta co zaznaczona
 > * Priorytet..... - to chyba nawet jest domyślnie
@@ -95,16 +95,16 @@ Cały bajer/funkcja polega na ustawieniu Zooma i Teamsa na jakieś inne urządze
 > #### Witam tych co pomineli xD
 >
 > teraz ustawimy urządzenie audio, czyli ostatnia rzecz i można się rozejść
-> <img src="./OBS_10.png" style="zoom: 50%;" />
+> <img src="./pictures/OBS_10.png" style="zoom: 50%;" />
 >
 > * Teraz w zakładce **Źródła obrazu** dodajemy **Przechwytywanie źródła dźwięku**.
 > * Nazwa dowolna (coś tam zaznaczone, domyślnie też jest)
-> * <img src="./OBS_11.png" style="zoom: 50%;" />
+> * <img src="./pictures/OBS_11.png" style="zoom: 50%;" />
 > Tutaj zaznaczamy to co zaznaczyliśmy w Teams i w Zoom w sensie to samo urządzenie audio
 > * Ostatnia rzecz to nasłuchiwanie
->   <img src="./OBS_12.png" style="zoom: 50%;" />
+>   <img src="./pictures/OBS_12.png" style="zoom: 50%;" />
 >   Prawym w sekcji mikser dźwięku i **Zaawansowane ustawienia dźwięku**
->   *<img src="./OBS_13.png" style="zoom: 50%;" />
+>   <img src="./pictures/OBS_13.png" style="zoom: 50%;" />
 >   Tutaj **Audio_out** to moja nazwa na **Przechwytywanie źródła dźwięku**, które dodawaliśmy wcześniej
 >
 ### 4. Podsumowanie
