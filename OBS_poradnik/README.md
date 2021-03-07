@@ -73,6 +73,7 @@ Cały bajer/funkcja polega na ustawieniu Zooma i Teamsa na jakieś inne urządze
 > #### Jak umiesz okno nagrać to pomiajasz
 > Może nie każdy wie jak mieć ustawione okno w OBS do nagrywania, więc:
 > <img src="./pictures/OBS_6.png" style="zoom: 50%;" />
+> 
 > Okno, a nie ekran, bo inaczej nie bedzie sobie można wrzucić przeglądarki na ekran, a wiadomo, że są często ważniejsze rzeczy niż wykład.
 >
 > Potem wybieramy drobne pierdoły:
