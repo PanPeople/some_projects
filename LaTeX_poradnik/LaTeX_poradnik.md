@@ -1,5 +1,3 @@
-(setq markdown-css-paths
-    '("https://gist.githubusercontent.com/tuzz/3331384/raw/fc0160dd7ea0b4a861533c4d6c232f56291796a3/github.css")))
 # LaTeX poradnik
 
 ## Wstęp
@@ -296,12 +294,15 @@
 ### Otoczenie $
 
 > Tego to się naużywasz.
->Korzystamy z **$** na początku i na końcu:
+>
+> ![formula](https://render.githubusercontent.com/render/math?math=\sqrt[n]{ab})
+>
+> Korzystamy z **$** na początku i na końcu:
 >
 > ```latex
 > $$ a^2 + b^2 = c^2 $$
 > ```
->Dzięki czemu wzorek: <img src="https://latex.codecogs.com/svg.latex?\Large&space;a^2 + b^2 = c^2"  style="zoom:70%;" /> można wrzucić elegancko w tekst.
+> Dzięki czemu wzorek: <img src="https://latex.codecogs.com/svg.latex?\Large&space;a^2 + b^2 = c^2"  style="zoom:70%;" /> można wrzucić elegancko w tekst.
 
 ### Poważy błąd w ilości dwóch sztuk:
 
