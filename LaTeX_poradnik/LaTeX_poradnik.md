@@ -1,4 +1,5 @@
-(setq markdown-css-paths '("https://gist.githubusercontent.com/tuzz/3331384/raw/fc0160dd7ea0b4a861533c4d6c232f56291796a3/github.css"))
+(setq markdown-css-paths
+    '("https://gist.githubusercontent.com/tuzz/3331384/raw/fc0160dd7ea0b4a861533c4d6c232f56291796a3/github.css")))
 # LaTeX poradnik
 
 ## Wstęp
