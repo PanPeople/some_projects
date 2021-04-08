@@ -29,33 +29,12 @@
 >
 > 
 
-## Spis treści (nie klikalny, potem coś zaczaruję):
+## Spis treści:
 
-> * Wstęp
->   * Przedmowa
->   * Parę zdań o LaTeX
-> * Biblioteki
-> * Zdjęcia
-> * Tabelki
->   * Wstęp
->   * Jak to wrzucać w ogóle
->   * "Co gdy LaTeX postanowi wypierdolić twoją tabletkę/zdjęcie 3 strony dalej"
-> * Bibliografia
->   * Wstęp
->   * Jak to wrzucać w ogóle
-> * Zapis matematyczny
->   * begin equasion i $$
-> * Listy
->   * itemize
->   * enumerate
-> * Kolumny (lub wejście w 4 gęstość)
-> * Rozdziały
-> * Przydatne praktyki
-> * DLC typu losowe informacje
->   * język polski w Overleaf
->   * co aby po polsku był `spis treści`
->   * zakomentowanie kilku linijek
->   * druciarstwo z `\vspace{}`
+>[TOC]
+>
+>
+>
 
 ## Biblioteki
 
@@ -162,15 +141,15 @@
 > \end{table}
 > ```
 >
-> <img src="C:\Users\PanPeople\AppData\Roaming\Typora\typora-user-images\image-20210322000915268.png" alt="image-20210322000915268" style="zoom: 33%;" />
+> <img src="LaTeX_poradnik.assets/image-20210322000915268.png" alt="image-20210322000915268" style="zoom: 50%;" />
 >
 > Z generatora wklejamy tylko to co jest w otoczeniu **table** reszta jak z kodu wyżej.
 >
 > * Dlaczego?
 > * Nie wiem, wiem tylko że jak chcę skalować tabelki to tylko tak to działa xD
 
-### "Co gdy LaTeX postanowi wypierdolić twoją tabletkę/zdjęcie 3 strony dalej"
-**![math}}{2a}](https://latex.codecogs.com/svg.latex?\Large&space;\sim) z dedykacją dla Michała**
+### Co gdy LaTeX postanowi wypierdolić twoją tabletkę/zdjęcie 3 strony dalej
+**$\sim$ z dedykacją dla Michała**
 
 > Na takie zjawisko składać się może kilka powodów, od razu zaznaczam że Word nie jest lepszy w tym. LaTeX ma powody aby coś odwalić.
 >
@@ -226,7 +205,7 @@
 >
 >
 >
-><img src="C:\Users\PanPeople\AppData\Roaming\Typora\typora-user-images\image-20210322021831459.png" alt="image-20210322021831459" style="zoom:67%;" />
+><img src="LaTeX_poradnik.assets/image-20210322021831459.png" alt="image-20210322021831459" style="zoom: 67%;" />
 >
 >
 >
@@ -254,22 +233,22 @@
 >
 > * jako pewne otoczenie/zdęcie, coś jako otoczenie **figure** ale bez numeracji
 >
-> <img src="https://latex.codecogs.com/svg.latex?\Large&space;x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" alt="math}}{2a}" style="zoom:80%;" />
+>   ​																							$x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}$
 >
 > * jako pewne otoczenie/zdęcie, coś jako otoczenie **figure** ale z  numeracji każdej matematycznej formułki (w sprawku jak ktoś wymaga numeracji wzorków to tym lecimy)
 >
-> <img src="https://latex.codecogs.com/svg.latex?\Large&space;x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" alt="math}}{2a}" style="zoom:80%;" />
+> ​																							$x=\frac{-b\pm\sqrt{b^2-4ac}}{2a} \; _{[1]}$
 >
 >
 > * w tekście, tak jak zwykłe literki
 >
-> <img src="https://latex.codecogs.com/svg.latex?\Large&space;x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}" alt="math}}{2a}" style="zoom:80%;" /> 
+> Piszę sobie $x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}$  w zdaniu.
 >
 > I tu nie ma, które lepsze czy coś, bierzemy to czego potrzebujemy
 >
 > Do jakiegoś poważnego sprawka czy innej inżynierki chcemy korzystać z tego pierwszego
 >
-> A jak w tekście mamy ochotę wrzucić <img src="https://latex.codecogs.com/svg.latex?\Large&space;\delta" alt="math}}{2a}" style="zoom:80%;" /> to korzystamy z drugiego otoczenia.
+> A jak w tekście mamy ochotę wrzucić $\delta$ to korzystamy z drugiego otoczenia.
 
 ### Otoczenie $$
 
@@ -281,7 +260,7 @@
 > $$ a^2 + b^2 = c^2 $$
 > ```
 >
-> <img src="https://latex.codecogs.com/svg.latex?\Large&space;a^2+b^2=c^2" style="zoom:80%;" />
+> ​																							$ a^2 + b^2 = c^2 $
 >
 > Generalnie do sprawek jak jakiś gruby wzór z objaśnieniem to można korzystać z tego.
 >
@@ -291,39 +270,39 @@
 ### Otoczenie \begin{equasion}
 
 > To samo co wyżej **tylko** wzór dostaje swój numerek, gdyby nie to to można by używać z **$$** zamiennie
+>
+> ​																							$ a^2 + b^2 = c^2 \; _{[1]}$
 ### Otoczenie $
 
 > Tego to się naużywasz.
 >
-> ![formula](https://render.githubusercontent.com/render/math?math=\sqrt[n]{ab})
->
 > Korzystamy z **$** na początku i na końcu:
 >
 > ```latex
-> $$ a^2 + b^2 = c^2 $$
+>$ a^2 + b^2 = c^2 $
 > ```
-> Dzięki czemu wzorek: <img src="https://latex.codecogs.com/svg.latex?\Large&space;a^2 + b^2 = c^2"  style="zoom:70%;" /> można wrzucić elegancko w tekst.
+> Dzięki czemu wzorek: $ a^2 + b^2 = c^2 $ można wrzucić elegancko w tekst.
 
 ### Poważy błąd w ilości dwóch sztuk:
 
 > Skoro mogę to napiszę. Najważniejszy błąd w LaTeX to zapominanie o wrzuceniu zapisu matematycznego w otoczenie matematyczne.
 > Indeksy dolne i górne to już jest zapis matematyczny. 
 >
-> Dlatego jak masz ochotę napisać  <img src="https://latex.codecogs.com/svg.latex?\Large&space;x^2" alt="math}}{2a}" style="zoom:80%;" /> lub <img src="https://latex.codecogs.com/svg.latex?\Large&space;x_2" alt="math}}{2a}" style="zoom:80%;" /> w zdaniu to proszę zapisać to tak:
+> Dlatego jak masz ochotę napisać  $x^2$ lub $x_2$ w zdaniu to proszę zapisać to tak:
 >
 > ```latex
 > Dlatego jak masz ochotę napisać $x^2$ lub $x_$ w zdaniu to proszę zapisać to tak: %dobrze
-> Dlatego jak masz ochotę napisać x^2 lub x_ w zdaniu to proszę zapisać to tak: %źle
+> Dlatego jak masz ochotę napisać x^2 lub x_ w zdaniu to proszę zapisać to tak: %źle (czasami zadziała)
 > ```
 > 
 > Drugi błąd to zapominanie o klamerkach:
->Jeśli mamy ochotę na coś więcej w indeksach wpisać, to trzeba użyć klamerki np. <img src="https://latex.codecogs.com/svg.latex?\Large&space;x_{123}" alt="math}}{2a}" style="zoom:80%;" /> to zapiszemy to tak:
+>Jeśli mamy ochotę na coś więcej w indeksach wpisać, to trzeba użyć klamerki np. $x_{123}$ to zapiszemy to tak:
 > 
 > ```latex
 >$x_{123}$ %dobrze
 > $x_123 $ %źle
 > ```
-> no chyba że chcesz uzyskać coś takiego: <img src="https://latex.codecogs.com/svg.latex?\Large&space;x_123" alt="math}}{2a}" style="zoom:80%;" />  co ma miejsce bardzo często to wtedy zapiszemy to :
+> no chyba że chcesz uzyskać coś takiego: $x_123$  co ma miejsce bardzo często to wtedy zapiszemy to :
 > 
 > ```latex
 >$x_123 $
@@ -707,7 +686,7 @@
 > ```
 >
 
-### co aby po polsku był `spis treści`
+### co aby po polsku był spis treści
 
 > Szybko i na temat do tego mamy bibliotekę z parametrem:
 >
@@ -721,7 +700,7 @@
 >
 > Nie ważne, ważne że można zmienić coś nie ruszając czegoś drugiego
 
-### druciarstwo z `\vspace{}`
+### druciarstwo z \vspace{}
 
 > no generalnie powoduje to stworzenie przestrzeni o zadanej wysokości. Bajer polega na tym, że można dawać wartości ujemne, więc jak cos nie wchodzi gdzie powinno, albo wystaje to `\vspace{} `ujemny i gotowe.
 
@@ -748,6 +727,8 @@
 >
 >_____
 >
->Szanowny Pan Damian kazał mi podpisywać moje teksty więc:
+>Szanowny Pan Lider Damian kazał mi podpisywać moje teksty więc:
 >
->> Tekst jest w całości autorstwa Mikołaja Czerniaka (mikolajek26@gmail.com). Wszelkie prawa niezastrzeżone xD 
+>> Tekst jest w całości autorstwa Mikołaja Czerniaka (czerniakczerniak26@gmail.com). Wszelkie prawa niezastrzeżone xD 
+>
+
