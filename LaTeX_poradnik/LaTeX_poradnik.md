@@ -718,7 +718,9 @@
 > > \listoftables
 > > ```
 >
-> 
+> > środowisko flush do wyrównywania lewo, prawo, środek
+> >
+> > [artykuł do tego](http://www.latex-kurs.x25.pl/paper/srodowiska_flushleft_flushright_center)
 
 ## Koniec
 
