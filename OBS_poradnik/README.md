@@ -126,6 +126,6 @@ Cały bajer/funkcja polega na ustawieniu Zooma i Teamsa na jakieś inne urządze
 >
 > Mam nadzieję, że wszystko jasne, jak nie to pomęcz się sam albo napisz.
 > 
-> ja by dźwięk przestał działać to przełacz odsłuchiwanie w ustawieniach na inne urządzenie albo uruchom ponownie
+> jakby dźwięk przestał działać to przełacz odsłuchiwanie w ustawieniach na inne urządzenie albo uruchom ponownie
 
 
