@@ -135,25 +135,6 @@
 > _________
 ### DOUBLE zdjęcia 
 
->```latex
->\begin{figure}[h!]
->     \centering
->     \begin{subfigure}[b]{0.45\textwidth}
->         \centering
->         \includegraphics[width=\textwidth]{pictures/Zad 2/2c.PNG}
->         \caption{Układ z diodą 1N1183}
->         \label{fig:y equals x}
->     \end{subfigure}
->     \hfill
->     \begin{subfigure}[b]{0.45\textwidth}
->         \centering
->         \includegraphics[width=\textwidth]{pictures/Zad 2/2c1.PNG}
->         \caption{Wykres dla układu zawierającego diodę 1N1183}
->         \label{fig:three sin x}
->     \end{subfigure}
->\end{figure}
->```
->
 >
 
 ## Tabelki
