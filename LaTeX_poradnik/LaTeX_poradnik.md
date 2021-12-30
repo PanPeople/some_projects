@@ -272,7 +272,7 @@
 ### Jak to wrzucać w ogóle
 >Po pierwsze musimy stworzyć plik z naszymi pozycjami naukowymi.
 >
->Nazwa pliku to:  **twoja_nazwa.lib**
+>Nazwa pliku to:  **twoja_nazwa.bib**
 >
 >Struktura każdej pozycji zawiera elementy takie jak tytuł, autor, sposób publikacji,notatka (często tzw. dostęp)
 >
