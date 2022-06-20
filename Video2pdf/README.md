@@ -44,6 +44,14 @@
     pip install pytest-shutil
    ```
 
+- oraz samego **ffmpeg**:
+  - na windows: pobieramy to: [ffmpeg_binaries](https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-full.7z)
+    - wypakowywyjemy w sumie tylko zawartość pliku bin:
+      <img src="README.assets/image-20220620110251634.png" alt="image-20220620110251634" style="zoom: 80%;" /> 
+    - należy dodać do PATH ściezkę do ffmpeg-a
+     <img src="README.assets/image-20220620112059828.png" alt="image-20220620112059828" style="zoom:80%;" />  
+    - po wpisaniu w konsolę ` ffpeg` powinniśmy widzieć takie wyjście jak na zdjęciu wyżej
+
 
 ### Uruchomienie
 
